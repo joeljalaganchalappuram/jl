@@ -80,3 +80,55 @@ public class InsertEmployeeServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 }
+
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.util.regex.Pattern;
+
+public class RegisterServlet extends HttpServlet {
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String ageStr = request.getParameter("age");
+
+        String message = "";
+
+        // Validate email format using regex
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        boolean isEmailValid = Pattern.matches(emailRegex, email);
+
+        // Validate age
+        int age = 0;
+        try {
+            age = Integer.parseInt(ageStr);
+        } catch (NumberFormatException e) {
+            message = "Invalid age format!";
+        }
+
+        if (!isEmailValid) {
+            message = "Invalid email format!";
+        } else if (age < 18) {
+            message = "You must be 18 or older to register.";
+        }
+
+        if (!message.isEmpty()) {
+            request.setAttribute("message", message);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("register.jsp");
+            dispatcher.forward(request, response);
+        } else {
+            // Success - for now, just show confirmation (could save to DB here)
+            response.setContentType("text/html");
+            response.getWriter().println("<html><body>");
+            response.getWriter().println("<h2>Registration Successful</h2>");
+            response.getWriter().println("<p>Name: " + name + "</p>");
+            response.getWriter().println("<p>Email: " + email + "</p>");
+            response.getWriter().println("<p>Age: " + age + "</p>");
+            response.getWriter().println("</body></html>");
+        }
+    }
+}
